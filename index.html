@@ -788,7 +788,7 @@ SCENES.push({ slug:"names", label:"The couple", bg:["#dfe7ef","#cfe0bf"],
     L.push(`<div class="ln" style="--i:${i++};margin-top:26px">${ornament()}</div>`);
     return {top:90, html:`<div class="onDrape nglow">${L.join("")}</div>`}; },
   hint:{x:540,y:1850,label:"Tap to continue",cx:0,cy:-120},
-  async tap(sc){ windStreaks(); marigolds({count:240,over:1500,speed:1.25,depth:DH*.25,allPink:true,wind:-2.4,spread:1.6});
+  async tap(sc){ windStreaks(); marigolds({count:260,over:1500,speed:1.25,depth:DH*.25,allWhite:true,wind:-2.4,spread:1.6});
     for(const id of ["bougL","roseR"]) if(sc.L[id]) sc.L[id].animate([{rotate:"0deg"},{rotate:id==="bougL"?"-4deg":"4deg"},{rotate:"0deg"}],{duration:1300,easing:"ease-in-out"});
     await wait(1100); },
   out:{type:"breeze"} });
@@ -1009,7 +1009,7 @@ function paintScene(sc){ if(!sc.ready) sc.ready=(async()=>{ for(const ly of sc.l
 let SC=[];
 const sceneData={};
 async function boot(){ document.body.insertAdjacentHTML("beforeend",`<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>${DEFS}</defs></svg>`);
-  SC=SCENES.map(buildScene); if(location.hash==="#test") speedBar(); buildDots(); layout(); paper(); buildCurtain();
+  SC=SCENES.map(buildScene); if(location.hash==="#test"||/[?&]test/.test(location.search)) speedBar(); addEventListener("hashchange",()=>{ if(location.hash==="#test") speedBar(); }); buildDots(); layout(); paper(); buildCurtain();
   addEventListener("resize",layout);
   device.addEventListener("keydown",e=>{ if((e.key==="Enter"||e.key===" ")&&state.opened&&!e.target.closest("button,a")){ const sc=SC[state.idx]; if(sc.def.tap){ e.preventDefault(); trigger(sc);} } });
   $("#cvLabel").textContent=COVERS[COVER_KEY].label; $("#cvPrev").onclick=()=>stepVariant(-1); $("#cvNext").onclick=()=>stepVariant(1); if(CONFIG.countdownTo) tickCountdown();
@@ -1159,12 +1159,13 @@ let mgC=null, mgX=null, mgP=[], mgRun=0;
 const MG_COLS=["#ffd23a","#ffc21f","#f9a91a","#f39412","#ffe17a","#ee8a0c"];
 function mgCanvas(){ if(!mgC){ mgC=document.createElement("canvas"); mgC.id="mg"; mgC.className="fx"; mgC.style.zIndex="37"; mgC.setAttribute("aria-hidden","true"); fxC.parentNode.insertBefore(mgC,fxC.nextSibling); mgX=mgC.getContext("2d"); }
   const dpr=devicePixelRatio; if(mgC.width!==Math.round(DW*dpr)){ mgC.width=Math.round(DW*dpr); mgC.height=Math.round(DH*dpr); mgC.style.width=DW+"px"; mgC.style.height=DH+"px"; } }
+const WH_COLS=["#ffffff","#fffdf9","#fdf7f0","#fffaf4","#f9f3ec","#ffffff"];
 const PK_COLS=["#f6a5bd","#ef86a6","#fbc6d4","#e86f95","#ffd9e3","#f49ab4"];
 /* toPink: each petal's colour follows its spawn time — marigold orange first, a mixed band, then all rose pink */
-function marigolds({count=80, over=1200, speed=1, depth=60, toPink=false, allPink=false, wind=0, spread=1}={}){ mgCanvas(); const t0=performance.now(); over/=SPEED;
-  for(let i=0;i<count;i++){ const bt=Math.random(), pink=allPink||(toPink&&Math.random()<Math.min(1,Math.max(0,(bt-.12)/.38))), head=!pink&&Math.random()<.09, r=(head?16+Math.random()*8:7+Math.random()*7)*Math.max(.7,S*1.6);
+function marigolds({count=80, over=1200, speed=1, depth=60, toPink=false, allPink=false, allWhite=false, wind=0, spread=1}={}){ mgCanvas(); const t0=performance.now(); over/=SPEED;
+  for(let i=0;i<count;i++){ const bt=Math.random(), pink=allPink||allWhite||(toPink&&Math.random()<Math.min(1,Math.max(0,(bt-.12)/.38))), head=!pink&&Math.random()<.09, r=(head?16+Math.random()*8:7+Math.random()*7)*Math.max(.7,S*1.6);
     mgP.push({born:t0+bt*over, x:(Math.random()*spread-(spread-1)*(wind<0?0:1))*DW, y:-30-Math.random()*depth, vx:wind+(Math.random()-.5)*.8, vy:(1.6+Math.random()*2.2)*speed, r, a:Math.random()*6.28, va:(Math.random()-.5)*.12,
-      f:Math.random()*6.28, vf:.05+Math.random()*.09, sw:Math.random()*6.28, c:pink?PK_COLS[i%PK_COLS.length]:MG_COLS[i%MG_COLS.length], e:pink?"#c94f78":"#e07d08", pink, head}); }
+      f:Math.random()*6.28, vf:.05+Math.random()*.09, sw:Math.random()*6.28, c:allWhite?WH_COLS[i%WH_COLS.length]:pink?PK_COLS[i%PK_COLS.length]:MG_COLS[i%MG_COLS.length], e:allWhite?"#d8ccc0":pink?"#c94f78":"#e07d08", pink, head}); }
   if(!mgRun) mgRun=requestAnimationFrame(mgTick); }
 function mgTick(now){ const dpr=devicePixelRatio; mgX.setTransform(1,0,0,1,0,0); mgX.clearRect(0,0,mgC.width,mgC.height); mgX.setTransform(dpr,0,0,dpr,0,0);
   mgP=mgP.filter(p=>p.y<DH+60&&p.x>-80&&p.x<DW+80); 
